@@ -5,57 +5,15 @@ import { Icon } from './Icons';
 import { User, WellnessLog, Medication, ChatMessage, CalendarEvent, Contact } from '../types';
 import { getGroundedSuggestions, GroundedSearchResult } from '../services/geminiService';
 
+interface TeamChatProps {
+    messages: ChatMessage[];
+    onSendMessage: (message: ChatMessage) => void;
+    currentUser: User;
+}
 
-const MOCK_USERS: { [key: string]: User } = {
-  stacey: { id: 'stacey', name: 'Stacey', avatar: 'https://picsum.photos/seed/stacey/100/100' },
-  dale: { id: 'dale', name: 'Dale', avatar: 'https://picsum.photos/seed/dale/100/100' },
-  john: { id: 'john', name: 'John', avatar: 'https://picsum.photos/seed/john/100/100' },
-  craig: { id: 'craig', name: 'Craig', avatar: 'https://picsum.photos/seed/craig/100/100' },
-  amber: { id: 'amber', name: 'Amber', avatar: 'https://picsum.photos/seed/amber/100/100' },
-};
-
-const calendarEvents: CalendarEvent[] = [
-  { id: '1', title: 'Morning Meds', day: 'Monday', time: '8 AM', assignee: MOCK_USERS.stacey, type: 'Shift' },
-  { id: '2', title: 'Lunch & Walk', day: 'Tuesday', time: '12 PM', assignee: MOCK_USERS.craig, type: 'Shift' },
-  { id: '3', title: "Dale's Birthday", day: 'Wednesday', type: 'Birthday' },
-  { id: '4', title: 'Dinner', day: 'Thursday', time: '6 PM', assignee: MOCK_USERS.john, type: 'Shift' },
-  { id: '5', title: 'Breakfast', day: 'Friday', time: '8 AM', assignee: MOCK_USERS.craig, type: 'Shift' },
-  { id: '6', title: 'Dr. Appointment', day: 'Wednesday', time: '10 AM', assignee: MOCK_USERS.john, type: 'Shift' },
-  { id: '7', title: 'Pick up Rx', day: 'Friday', time: 'Afternoon', assignee: MOCK_USERS.stacey, type: 'Shift' },
-  { id: '8', title: 'Family Dinner', day: 'Sunday', time: '6 PM', type: 'Shift' },
-];
-
-const wellnessLogs: WellnessLog[] = [
-  { id: '1', author: MOCK_USERS.john, timestamp: '2 days ago', category: 'Event', content: 'Gram finished her Physical Therapy today. All good!' },
-  { id: '2', author: MOCK_USERS.stacey, timestamp: 'Yesterday', category: 'Update', content: 'Ate well, mood is excellent. We spent some time in the garden.', imageUrl: 'https://picsum.photos/seed/garden/400/200' },
-  { id: '3', author: MOCK_USERS.craig, timestamp: 'Today', category: 'Observation', content: 'Seems a little tired this afternoon.' },
-];
-
-const medications: Medication[] = [
-    {id: '1', name: 'Lisinopril', dosage: '10mg', time: '8:00 AM', lastAdministeredBy: MOCK_USERS.stacey, lastAdministeredAt: 'Today 8:02 AM'},
-    {id: '2', name: 'Metformin', dosage: '500mg', time: '8:00 AM & 8:00 PM', lastAdministeredBy: MOCK_USERS.stacey, lastAdministeredAt: 'Today 8:03 AM'},
-    {id: '3', name: 'Vitamin D', dosage: '2000 IU', time: '8:00 AM'},
-];
-
-const phonebookContacts: Contact[] = [
-    {id: 'p1', name: 'Dr. Evans (GP)', number: '555-123-4567', type: 'Doctor'},
-    {id: 'p2', name: 'Main St Pharmacy', number: '555-987-6543', type: 'Pharmacy'},
-    {id: 'p3', name: 'Stacey (Primary)', number: '555-222-3333', type: 'Family'},
-    {id: 'p4', name: 'John', number: '555-444-5555', type: 'Family'},
-    {id: 'p5', name: 'Handyman Hank', number: '555-REP-AIRS', type: 'Service'},
-];
-
-const mockChatMessages: ChatMessage[] = [
-  { id: 'c1', author: MOCK_USERS.stacey, timestamp: '9:05 AM', content: "Just a reminder, John is taking Gram to her appointment at 2 PM." },
-  { id: 'c2', author: MOCK_USERS.john, timestamp: '9:06 AM', content: "Confirmed! I'll be there." },
-  { id: 'c3', author: MOCK_USERS.craig, timestamp: '9:10 AM', content: "Great, thanks both. I'll make sure she has her lunch before you go." },
-];
-
-const TeamChat: React.FC = () => {
-    const [messages, setMessages] = useState<ChatMessage[]>(mockChatMessages);
+const TeamChat: React.FC<TeamChatProps> = ({ messages, onSendMessage, currentUser }) => {
     const [newMessage, setNewMessage] = useState('');
     const chatContainerRef = useRef<HTMLDivElement>(null);
-    const currentUser = MOCK_USERS.craig;
 
     useEffect(() => {
         if (chatContainerRef.current) {
@@ -68,13 +26,13 @@ const TeamChat: React.FC = () => {
         if (!newMessage.trim()) return;
 
         const message: ChatMessage = {
-            id: `c${messages.length + 1}`,
+            id: `c${Date.now()}`,
             author: currentUser,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             content: newMessage,
         };
 
-        setMessages([...messages, message]);
+        onSendMessage(message);
         setNewMessage('');
     };
 
@@ -88,12 +46,12 @@ const TeamChat: React.FC = () => {
                             {!isCurrentUser && (
                                 <img src={msg.author.avatar} alt={msg.author.name} className="w-8 h-8 rounded-full self-start" />
                             )}
-                             <div className={`w-auto max-w-xs md:max-w-sm p-3 rounded-lg ${isCurrentUser ? 'bg-brand-primary text-white' : 'bg-gray-200 text-brand-text'}`}>
+                             <div className={`w-auto max-w-xs md:max-w-sm p-3 rounded-lg ${isCurrentUser ? 'bg-brand-subtle text-brand-text' : 'bg-white border border-gray-200 text-brand-text'}`}>
                                 {!isCurrentUser && (
                                     <p className="font-semibold text-sm mb-1">{msg.author.name}</p>
                                 )}
                                 <p>{msg.content}</p>
-                                <p className={`text-xs mt-1 text-right ${isCurrentUser ? 'text-purple-200' : 'text-brand-subtle'}`}>{msg.timestamp}</p>
+                                <p className={`text-xs mt-1 text-right ${isCurrentUser ? 'text-brand-text/60' : 'text-brand-subtle'}`}>{msg.timestamp}</p>
                             </div>
                         </div>
                     );
@@ -172,8 +130,27 @@ const GeminiSearch: React.FC = () => {
     );
 };
 
+interface CareCircleProps {
+    currentUser: User;
+    users: { [key: string]: User };
+    calendarEvents: CalendarEvent[];
+    wellnessLogs: WellnessLog[];
+    medications: Medication[];
+    contacts: Contact[];
+    chatMessages: ChatMessage[];
+    onSendMessage: (message: ChatMessage) => void;
+}
 
-export const CareCircle: React.FC = () => {
+export const CareCircle: React.FC<CareCircleProps> = ({
+    currentUser,
+    users,
+    calendarEvents,
+    wellnessLogs,
+    medications,
+    contacts,
+    chatMessages,
+    onSendMessage
+}) => {
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   return (
@@ -239,10 +216,10 @@ export const CareCircle: React.FC = () => {
                     ))}
                 </ul>
             </Card>
-            <TeamChat />
+            <TeamChat messages={chatMessages} onSendMessage={onSendMessage} currentUser={currentUser} />
             <Card title="Gram's Phonebook" icon={<Icon name="phone" className="w-6 h-6 text-blue-500" />}>
                  <ul className="space-y-3">
-                    {phonebookContacts.map(contact => (
+                    {contacts.map(contact => (
                         <li key={contact.id} className="flex justify-between items-center p-2 rounded-lg bg-gray-50">
                             <div>
                                 <p className="font-semibold">{contact.name}</p>

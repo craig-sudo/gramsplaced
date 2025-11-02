@@ -1,4 +1,5 @@
-import { GoogleGenAI, Type } from "@google/genai";
+
+import { GoogleGenAI, Type, Chat } from "@google/genai";
 import { CalendarEvent, WellnessLog, Project, ShoppingItem, TaskStatus, MealPlanDay, LiveScore } from '../types';
 
 // FIX: Initialize GoogleGenAI with API_KEY from environment variables directly as per guidelines.
@@ -8,6 +9,22 @@ export interface GroundedSearchResult {
   answer: string;
   sources: { title: string; uri: string }[];
 }
+
+export const startLunaiChat = (): Chat => {
+  const systemInstruction = `You are LUNai, a friendly and compassionate AI care assistant for the 'Gram's House Hub' app. Your name is a play on 'Luna' (a beloved family pet) and 'AI'.
+Your purpose is to help a multi-generational family organize caregiving, manage household tasks, and find moments of joy. Be warm, encouraging, and practical.
+Offer tips on dementia care, suggest simple games Gram might enjoy, help users find features in the app, and provide helpful, grounded advice for family harmony.
+When asked about app features, refer to them by their names: 'Dashboard', 'Care Circle', 'To-Do & Projects', 'Pet & Baby Log', 'Shared Secure Vault', and 'Memories'.
+Keep your responses concise and easy to understand.`;
+
+  const chat = ai.chats.create({
+    model: 'gemini-2.5-flash-lite',
+    config: {
+      systemInstruction: systemInstruction,
+    },
+  });
+  return chat;
+};
 
 export const getGroundedSuggestions = async (query: string): Promise<GroundedSearchResult> => {
   // FIX: Removed check for API_KEY as it's a hard requirement from the environment.
@@ -185,7 +202,7 @@ export const getLiveGameScore = async (opponent: string): Promise<LiveScore | nu
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: `Get the live score for the Montreal Canadiens vs ${opponent} hockey game. Respond with only the data in this exact format, without any extra text or explanation: MTL_SCORE,OPPONENT_SCORE,PERIOD,TIME_REMAINING. For example: 3,1,2,10:45`,
+      contents: `What is the live score for the Montreal Canadiens vs ${opponent} hockey game? If the game is live, please provide the score for Montreal, the score for the opponent, the current period, and the time remaining in the period. Format your response as a comma-separated list: MTL_SCORE,OPPONENT_SCORE,PERIOD,TIME_REMAINING. For example: 3,1,2,10:45. If the game is not live, just say "Not live".`,
       config: {
         tools: [{googleSearch: {}}],
       },
@@ -193,8 +210,8 @@ export const getLiveGameScore = async (opponent: string): Promise<LiveScore | nu
     
     const text = response.text?.trim();
 
-    if (!text) {
-      console.warn("No text response from Gemini for live score.");
+    if (!text || text.toLowerCase().includes('not live')) {
+      console.warn("No text response from Gemini for live score or game is not live.");
       return null;
     }
 
@@ -202,10 +219,10 @@ export const getLiveGameScore = async (opponent: string): Promise<LiveScore | nu
 
     if (parts.length === 4) {
       return {
-        mtlScore: parts[0],
-        opponentScore: parts[1],
-        period: parts[2],
-        timeRemaining: parts[3],
+        mtlScore: parts[0].trim(),
+        opponentScore: parts[1].trim(),
+        period: parts[2].trim(),
+        timeRemaining: parts[3].trim(),
       };
     }
     console.warn("Could not parse score from Gemini:", text);

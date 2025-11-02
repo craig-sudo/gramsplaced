@@ -47,6 +47,11 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface BotChatMessage {
+  role: 'user' | 'model';
+  text: string;
+}
+
 export interface Contact {
     id: string;
     name: string;
@@ -148,4 +153,20 @@ export interface LiveScore {
   opponentScore: string;
   period: string;
   timeRemaining: string;
+}
+
+export interface AppData {
+  users: { [key: string]: User };
+  calendarEvents: CalendarEvent[];
+  wellnessLogs: WellnessLog[];
+  medications: Medication[];
+  contacts: Contact[];
+  chatMessages: ChatMessage[];
+  renovationProject: Project;
+  chores: Chore[];
+  shoppingList: ShoppingItem[];
+  petLogs: PetLog[];
+  babyPrepTasks: BabyPrepTask[];
+  memories: MemoryItem[];
+  hockeySchedule: HockeyGame[];
 }

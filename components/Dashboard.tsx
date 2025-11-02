@@ -5,71 +5,6 @@ import { Icon } from './Icons';
 import { User, CalendarEvent, WellnessLog, Project, ShoppingItem, TaskStatus, MealPlanDay, HockeyGame, LiveScore } from '../types';
 import { generateWeeklyUpdate, WeeklyUpdateContext, generateMealPlan, getGroundedSuggestions, GroundedSearchResult, getLiveGameScore } from '../services/geminiService';
 
-
-// --- Start of data copied for newsletter generation ---
-// Note: In a real app, this data would be fetched or managed via a state management solution.
-// It is duplicated here to provide context for the newsletter generation feature
-// without a major refactor of the application's data flow.
-
-const MOCK_USERS_FOR_NEWSLETTER: { [key: string]: User } = {
-  stacey: { id: 'stacey', name: 'Stacey', avatar: 'https://picsum.photos/seed/stacey/100/100' },
-  dale: { id: 'dale', name: 'Dale', avatar: 'https://picsum.photos/seed/dale/100/100' },
-  john: { id: 'john', name: 'John', avatar: 'https://picsum.photos/seed/john/100/100' },
-  craig: { id: 'craig', name: 'Craig', avatar: 'https://picsum.photos/seed/craig/100/100' },
-};
-
-const newsletterCalendarEvents: CalendarEvent[] = [
-  { id: '1', title: 'Morning Meds', day: 'Monday', time: '8 AM', assignee: MOCK_USERS_FOR_NEWSLETTER.stacey, type: 'Shift' },
-  { id: '2', title: 'Lunch & Walk', day: 'Tuesday', time: '12 PM', assignee: MOCK_USERS_FOR_NEWSLETTER.craig, type: 'Shift' },
-  { id: '3', title: "Dale's Birthday", day: 'Wednesday', type: 'Birthday' },
-  { id: '4', title: 'Dinner', day: 'Thursday', time: '6 PM', assignee: MOCK_USERS_FOR_NEWSLETTER.john, type: 'Shift' },
-];
-
-const dashboardCalendarEvents: CalendarEvent[] = [
-  { id: '1', title: 'Morning Meds', day: 'Today', time: '8 AM', assignee: MOCK_USERS_FOR_NEWSLETTER.stacey, type: 'Shift' },
-  { id: '2', title: 'Lunch & Walk', day: 'Tuesday', time: '12 PM', assignee: MOCK_USERS_FOR_NEWSLETTER.craig, type: 'Shift' },
-  { id: '3', title: "Dale's Birthday", day: 'Wednesday', type: 'Birthday' },
-  { id: '4', title: 'Dinner', day: 'Thursday', time: '6 PM', assignee: MOCK_USERS_FOR_NEWSLETTER.john, type: 'Shift' },
-];
-
-const newsletterWellnessLogs: WellnessLog[] = [
-  { id: '2', author: MOCK_USERS_FOR_NEWSLETTER.stacey, timestamp: 'Yesterday', category: 'Update', content: 'Ate well, mood is excellent. We spent some time in the garden.' },
-  { id: '1', author: MOCK_USERS_FOR_NEWSLETTER.john, timestamp: '2 days ago', category: 'Event', content: 'Gram finished her Physical Therapy today. All good!' },
-];
-
-const newsletterRenovationProject: Project = {
-  id: 'reno1',
-  title: "Bathroom Redo",
-  lead: MOCK_USERS_FOR_NEWSLETTER.stacey,
-  tasks: [
-    { id: 't1', title: 'Pick up paint swatches', description: 'Get samples for "calm blue" and "sea green"', assignee: MOCK_USERS_FOR_NEWSLETTER.craig, status: TaskStatus.ToDo, dueDate: 'Saturday' },
-    { id: 't2', title: 'Finalize new vanity', description: 'Decide between the two options from Home Depot', assignee: MOCK_USERS_FOR_NEWSLETTER.stacey, status: TaskStatus.ToDo },
-    { id: 't3', title: 'Demolish old tile', description: 'Be careful with the plumbing', assignee: MOCK_USERS_FOR_NEWSLETTER.dale, status: TaskStatus.InProgress },
-  ]
-};
-
-const newsletterShoppingList: ShoppingItem[] = [
-    {id: 's1', name: 'Milk', addedBy: MOCK_USERS_FOR_NEWSLETTER.craig, category: 'Groceries'},
-    {id: 's2', name: 'Paper Towels', addedBy: MOCK_USERS_FOR_NEWSLETTER.stacey, category: 'Supplies'},
-    {id: 's4', name: 'Ensure', addedBy: MOCK_USERS_FOR_NEWSLETTER.stacey, category: "Gram's"},
-];
-// --- End of data copied for newsletter generation ---
-
-const getPastDate = (hours: number, minutes: number) => {
-    return new Date(Date.now() - hours * 3600000 - minutes * 60000).toISOString();
-};
-
-const getFutureDate = (days: number, hours: number, minutes: number) => {
-    return new Date(Date.now() + days * 86400000 + hours * 3600000 + minutes * 60000).toISOString();
-};
-
-const MOCK_HOCKEY_SCHEDULE: HockeyGame[] = [
-    { id: 'g0', opponent: 'Ottawa Senators', date: getPastDate(1, 38), location: 'Home' },
-    { id: 'g1', opponent: 'Toronto Maple Leafs', date: getFutureDate(1, 4, 30), location: 'Home' },
-    { id: 'g2', opponent: 'Boston Bruins', date: getFutureDate(5, 2, 0), location: 'Away' },
-    { id: 'g3', opponent: 'Florida Panthers', date: getFutureDate(10, 0, 0), location: 'Away' },
-];
-
 const HockeyCountdown: React.FC<{ games: HockeyGame[] }> = ({ games }) => {
     const [timeRemaining, setTimeRemaining] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [currentTime, setCurrentTime] = useState(() => Date.now());
@@ -229,7 +164,7 @@ const HockeyCountdown: React.FC<{ games: HockeyGame[] }> = ({ games }) => {
 };
 
 
-const WeeklyUpdateGenerator: React.FC = () => {
+const WeeklyUpdateGenerator: React.FC<{ context: WeeklyUpdateContext }> = ({ context }) => {
     const [updateText, setUpdateText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
@@ -238,14 +173,6 @@ const WeeklyUpdateGenerator: React.FC = () => {
         setIsLoading(true);
         setUpdateText('');
         setIsCopied(false);
-
-        const context: WeeklyUpdateContext = {
-            calendarEvents: newsletterCalendarEvents,
-            wellnessLogs: newsletterWellnessLogs,
-            project: newsletterRenovationProject,
-            shoppingList: newsletterShoppingList,
-        };
-
         const result = await generateWeeklyUpdate(context);
         setUpdateText(result);
         setIsLoading(false);
@@ -410,28 +337,24 @@ const FamilyHarmonyAssistant: React.FC = () => {
     );
 };
 
-
-const MOCK_USERS = {
-  craig: { id: 'craig', name: 'Craig', avatar: 'https://picsum.photos/seed/craig/100/100' },
-  john: { id: 'john', name: 'John', avatar: 'https://picsum.photos/seed/john/100/100' },
-};
-
-const nextTasks = [
-  { id: 1, type: 'Chore', title: 'Walk Luna', time: 'Today: 6:00 PM', icon: 'dog' },
-  { id: 2, type: 'Care Shift', title: 'Gram Dinner', time: 'Tomorrow: 5:00 PM', icon: 'care' },
-  { id: 3, type: 'Renovation', title: 'Pick up paint swatches', time: 'Due Saturday', icon: 'projects' },
-];
-
-const lastUpdate = {
-  author: MOCK_USERS.john,
-  content: "Gram finished her Physical Therapy today. All good!",
-};
-
 interface DashboardProps {
   currentUser: User;
+  calendarEvents: CalendarEvent[];
+  project: Project;
+  shoppingList: ShoppingItem[];
+  wellnessLogs: WellnessLog[];
+  hockeySchedule: HockeyGame[];
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ currentUser }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ currentUser, calendarEvents, project, shoppingList, wellnessLogs, hockeySchedule }) => {
+  const nextTasks = [
+    { id: 1, type: 'Chore', title: 'Walk Luna', time: 'Today: 6:00 PM', icon: 'dog' },
+    { id: 2, type: 'Care Shift', title: 'Gram Dinner', time: 'Tomorrow: 5:00 PM', icon: 'care' },
+    { id: 3, type: 'Renovation', title: 'Pick up paint swatches', time: 'Due Saturday', icon: 'projects' },
+  ];
+
+  const lastUpdate = wellnessLogs.length > 0 ? wellnessLogs[0] : null;
+
   return (
     <div className="space-y-8">
       <div className="text-center">
@@ -439,7 +362,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser }) => {
         <p className="text-brand-subtle mt-1 font-sans normal-case">Here's your snapshot for today.</p>
       </div>
 
-      <HockeyCountdown games={MOCK_HOCKEY_SCHEDULE} />
+      <HockeyCountdown games={hockeySchedule} />
 
       <div className="bg-brand-subtle/20 border-l-4 border-brand-subtle text-brand-text p-4 rounded-lg shadow" role="alert">
         <p className="font-bold flex items-center gap-2"><Icon name="baby" className="w-5 h-5"/>Alert: Harper joining us on November 2nd!</p>
@@ -468,7 +391,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser }) => {
 
         <Card title="This Week's Schedule" icon={<Icon name="calendar" className="w-6 h-6 text-brand-secondary" />}>
             <ul className="space-y-3">
-                {dashboardCalendarEvents.map(event => (
+                {calendarEvents.slice(0, 4).map(event => (
                     <li key={event.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-3">
                             {event.type === 'Birthday' ? <Icon name="birthday" className="w-5 h-5 text-brand-secondary" /> : <Icon name="care" className="w-5 h-5 text-brand-primary" />}
@@ -484,20 +407,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser }) => {
         </Card>
 
         <Card title="Last Care Circle Update" icon={<Icon name="care" className="w-6 h-6 text-brand-accent" />}>
-            <div className="flex items-start gap-4">
-                <img src={lastUpdate.author.avatar} alt={lastUpdate.author.name} className="w-12 h-12 rounded-full" />
-                <div className="flex-1">
-                    <p className="font-semibold font-sans normal-case">{lastUpdate.author.name} says:</p>
-                    <blockquote className="mt-1 p-3 bg-brand-primary/5 border-l-4 border-brand-primary/20 rounded-r-lg">
-                        "{lastUpdate.content}"
-                    </blockquote>
+            {lastUpdate ? (
+                <div className="flex items-start gap-4">
+                    <img src={lastUpdate.author.avatar} alt={lastUpdate.author.name} className="w-12 h-12 rounded-full" />
+                    <div className="flex-1">
+                        <p className="font-semibold font-sans normal-case">{lastUpdate.author.name} says:</p>
+                        <blockquote className="mt-1 p-3 bg-brand-primary/5 border-l-4 border-brand-primary/20 rounded-r-lg">
+                            "{lastUpdate.content}"
+                        </blockquote>
+                    </div>
                 </div>
-            </div>
+            ) : <p>No updates yet.</p>}
         </Card>
         
         <FamilyHarmonyAssistant />
 
-        <WeeklyUpdateGenerator />
+        <WeeklyUpdateGenerator context={{ calendarEvents, wellnessLogs, project, shoppingList }} />
 
         <MealPlanner />
 

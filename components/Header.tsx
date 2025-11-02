@@ -95,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, cur
             <NavButton view={View.CareCircle} currentView={currentView} onClick={setCurrentView} iconName="care" />
             <NavButton view={View.Projects} currentView={currentView} onClick={setCurrentView} iconName="projects" />
             <NavButton view={View.PetBabyLog} currentView={currentView} onClick={setCurrentView} iconName="pet" />
-            <NavButton view={View.Vault} currentVw={currentView} onClick={setCurrentView} iconName="vault" />
+            <NavButton view={View.Vault} currentView={currentView} onClick={setCurrentView} iconName="vault" />
             <NavButton view={View.Memories} currentView={currentView} onClick={setCurrentView} iconName="memories" />
         </nav>
       </div>

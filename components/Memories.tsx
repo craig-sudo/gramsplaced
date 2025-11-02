@@ -5,39 +5,7 @@ import { Icon } from './Icons';
 import { User, MemoryItem } from '../types';
 import { generateMemoryStory } from '../services/geminiService';
 
-const MOCK_USERS: { [key: string]: User } = {
-  stacey: { id: 'stacey', name: 'Stacey', avatar: 'https://picsum.photos/seed/stacey/100/100' },
-  craig: { id: 'craig', name: 'Craig', avatar: 'https://picsum.photos/seed/craig/100/100' },
-};
-
-const INITIAL_MEMORIES: MemoryItem[] = [
-  {
-    id: 'mem1',
-    imageUrl: 'https://picsum.photos/seed/cottage/500/700',
-    prompt: 'Gram and Dale at the cottage, laughing',
-    story: "Here's that unforgettable summer day at the cottage. Gram's laughter was so infectious as she and Dale shared stories on the porch, a perfect moment of simple joy.",
-    date: 'Summer 1998',
-    uploadedBy: MOCK_USERS.stacey,
-  },
-  {
-    id: 'mem2',
-    imageUrl: 'https://picsum.photos/seed/wedding/600/400',
-    prompt: "Mom and Dad's wedding day",
-    story: "A beautiful snapshot from the wedding day. The look of pure happiness on their faces says it all – the start of a wonderful journey together.",
-    date: 'June 1985',
-    uploadedBy: MOCK_USERS.craig,
-  },
-  {
-    id: 'mem3',
-    imageUrl: 'https://picsum.photos/seed/fishing/500/300',
-    prompt: 'First fishing trip',
-    story: "Look at that concentration! This was the very first fishing trip, an early morning filled with excitement and a little bit of beginner's luck. A core memory for sure.",
-    date: 'July 2002',
-    uploadedBy: MOCK_USERS.stacey,
-  },
-];
-
-const AddMemory: React.FC<{ onAddMemory: (memory: MemoryItem) => void }> = ({ onAddMemory }) => {
+const AddMemory: React.FC<{ onAddMemory: (memory: MemoryItem) => void; currentUser: User; }> = ({ onAddMemory, currentUser }) => {
   const [prompt, setPrompt] = useState('');
   const [date, setDate] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -90,7 +58,7 @@ const AddMemory: React.FC<{ onAddMemory: (memory: MemoryItem) => void }> = ({ on
             prompt,
             story,
             date,
-            uploadedBy: MOCK_USERS.craig, // Assuming current user is Craig
+            uploadedBy: currentUser,
         };
         onAddMemory(newMemory);
 
@@ -154,14 +122,15 @@ const AddMemory: React.FC<{ onAddMemory: (memory: MemoryItem) => void }> = ({ on
 
 type SortOrder = 'newest' | 'oldest';
 
-export const Memories: React.FC = () => {
-  const [memories, setMemories] = useState<MemoryItem[]>(INITIAL_MEMORIES);
+interface MemoriesProps {
+    memories: MemoryItem[];
+    onAddMemory: (memory: MemoryItem) => void;
+    currentUser: User;
+}
+
+export const Memories: React.FC<MemoriesProps> = ({ memories, onAddMemory, currentUser }) => {
   const [selectedMemory, setSelectedMemory] = useState<MemoryItem | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
-
-  const addMemory = (memory: MemoryItem) => {
-      setMemories(prev => [memory, ...prev]);
-  }
 
   const sortedMemories = useMemo(() => {
     const sortableMemories = [...memories];
@@ -195,7 +164,7 @@ export const Memories: React.FC = () => {
                 </button>
             </div>
         </div>
-      <AddMemory onAddMemory={addMemory} />
+      <AddMemory onAddMemory={onAddMemory} currentUser={currentUser} />
       
       <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
         {sortedMemories.map(memory => (

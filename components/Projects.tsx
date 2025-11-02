@@ -4,37 +4,6 @@ import { Card } from './common/Card';
 import { Icon } from './Icons';
 import { User, Project, Task, Chore, ShoppingItem, TaskStatus } from '../types';
 
-const MOCK_USERS: { [key: string]: User } = {
-  stacey: { id: 'stacey', name: 'Stacey', avatar: 'https://picsum.photos/seed/stacey/100/100' },
-  dale: { id: 'dale', name: 'Dale', avatar: 'https://picsum.photos/seed/dale/100/100' },
-  craig: { id: 'craig', name: 'Craig', avatar: 'https://picsum.photos/seed/craig/100/100' },
-};
-
-const renovationProject: Project = {
-  id: 'reno1',
-  title: "Bathroom Redo",
-  lead: MOCK_USERS.stacey,
-  tasks: [
-    { id: 't1', title: 'Pick up paint swatches', description: 'Get samples for "calm blue" and "sea green"', assignee: MOCK_USERS.craig, status: TaskStatus.ToDo, dueDate: 'Saturday' },
-    { id: 't2', title: 'Finalize new vanity', description: 'Decide between the two options from Home Depot', assignee: MOCK_USERS.stacey, status: TaskStatus.ToDo },
-    { id: 't3', title: 'Demolish old tile', description: 'Be careful with the plumbing', assignee: MOCK_USERS.dale, status: TaskStatus.InProgress },
-    { id: 't4', title: 'Purchase toilet', description: 'Model #1234 from Lowes', assignee: MOCK_USERS.stacey, status: TaskStatus.Done },
-  ]
-};
-
-const chores: Chore[] = [
-    {id: 'c1', title: 'Take out trash & recycling', assignee: MOCK_USERS.craig, recurring: 'Weekly'},
-    {id: 'c2', title: 'Clean shared bathroom', assignee: MOCK_USERS.stacey, recurring: 'Weekly'},
-    {id: 'c3', title: 'Manage mail', assignee: MOCK_USERS.dale, recurring: 'Daily'},
-];
-
-const shoppingList: ShoppingItem[] = [
-    {id: 's1', name: 'Milk', addedBy: MOCK_USERS.craig, category: 'Groceries'},
-    {id: 's2', name: 'Paper Towels', addedBy: MOCK_USERS.stacey, category: 'Supplies'},
-    {id: 's3', name: 'Dog food', addedBy: MOCK_USERS.dale, category: 'Pet'},
-    {id: 's4', name: 'Ensure', addedBy: MOCK_USERS.stacey, category: "Gram's"},
-];
-
 const KanbanCard: React.FC<{ task: Task }> = ({ task }) => (
   <div className="bg-white p-3 rounded-lg shadow border border-gray-200 font-sans">
     <h4 className="font-semibold normal-case tracking-normal font-sans">{task.title}</h4>
@@ -58,14 +27,20 @@ const KanbanColumn: React.FC<{ title: TaskStatus; tasks: Task[] }> = ({ title, t
   </div>
 );
 
-export const Projects: React.FC = () => {
+interface ProjectsProps {
+    project: Project;
+    chores: Chore[];
+    shoppingList: ShoppingItem[];
+}
+
+export const Projects: React.FC<ProjectsProps> = ({ project, chores, shoppingList }) => {
   return (
     <div className="space-y-8">
-      <Card title={`Renovations: ${renovationProject.title}`} icon={<Icon name="projects" className="w-6 h-6 text-brand-secondary" />}>
+      <Card title={`Renovations: ${project.title}`} icon={<Icon name="projects" className="w-6 h-6 text-brand-secondary" />}>
         <div className="flex flex-col md:flex-row gap-4">
-          <KanbanColumn title={TaskStatus.ToDo} tasks={renovationProject.tasks.filter(t => t.status === TaskStatus.ToDo)} />
-          <KanbanColumn title={TaskStatus.InProgress} tasks={renovationProject.tasks.filter(t => t.status === TaskStatus.InProgress)} />
-          <KanbanColumn title={TaskStatus.Done} tasks={renovationProject.tasks.filter(t => t.status === TaskStatus.Done)} />
+          <KanbanColumn title={TaskStatus.ToDo} tasks={project.tasks.filter(t => t.status === TaskStatus.ToDo)} />
+          <KanbanColumn title={TaskStatus.InProgress} tasks={project.tasks.filter(t => t.status === TaskStatus.InProgress)} />
+          <KanbanColumn title={TaskStatus.Done} tasks={project.tasks.filter(t => t.status === TaskStatus.Done)} />
         </div>
       </Card>
 
