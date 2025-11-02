@@ -7,26 +7,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gram's House Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              'brand-primary': '#4A90E2',
-              'brand-secondary': '#F5A623',
-              'brand-accent': '#7ED321',
-              'brand-bg': '#F8F9FA',
-              'brand-text': '#333333',
-              'brand-subtle': '#A0AEC0',
+              'brand-primary': '#581845', // Deep Burgundy Purple
+              'brand-secondary': '#900C3F', // Brighter Magenta/Burgundy
+              'brand-accent': '#C70039', // Vibrant Red-Burgundy
+              'brand-bg': '#FDF8F5', // Warm Cream
+              'brand-text': '#422D3B', // Dark Desaturated Purple-Brown
+              'brand-subtle': '#A58399', // Muted, Dusty Purple
             },
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+              sans: ['Lora', 'serif'],
+              display: ['Playfair Display', 'serif'],
             }
           }
         }
       }
     </script>
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
   <script type="importmap">
 {
   "imports": {
@@ -37,7 +40,19 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+<style>
+  body {
+    background-color: #FDF8F5;
+    background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.1' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
+    font-family: 'Lora', serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    text-transform: uppercase;
+    font-weight: 700; /* bold */
+    letter-spacing: 0.05em;
+  }
+</style>
 </head>
   <body>
     <div id="root"></div>
